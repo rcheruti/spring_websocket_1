@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <script src="jquery.js"></script>
+    <script src="sock.js"></script>
+    <script src="stomp.js"></script>
+  </head>
+  <body>
+    
+    <textarea id="mensagem"></textarea> <br/>
+    <button id="enviar">Enviar</button>
+    <button id="limpar">Limpar</button>
+    <br/>
+    <pre id="respostas"></pre>
+
+    <script>
+      $(function() {
+        var texto = '';
+        var socket = StompJs.Stomp.over( new SockJS('/websocket') );
+
+        socket.connect({}, function(frame) {
+            console.log('Connected: ' + frame);
+            socket.subscribe('/topic/mensagem', function(msgObj) {
+              mensagem( msgObj.body );
+            });
+        });
+
+        $('#enviar').on('click', function(){
+          var msg = $('#mensagem').val();
+          socket.send("/app/mensagem", {}, msg);
+        });
+        $('#limpar').on('click', function(){
+          texto = '';
+          $('#respostas').text('');
+        });
+
+        function mensagem(msg) {
+          texto += msg + "\n";
+          $('#respostas').text(texto);
+        }
+      });
+    </script>
+  </body>
+</html>
